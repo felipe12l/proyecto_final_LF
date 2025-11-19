@@ -1,6 +1,9 @@
+import json
+
 from utils.decode import JWTDecoder
 from lexer.lexerEncode import EncodedLexer
 from lexer.lexerDecode import LexerDecoded
+from semantic.semantic import SemanticAnalyzer
 
 def test(token):
     print("encoded")
@@ -48,6 +51,22 @@ def test(token):
         print("   ✔ Lexico payload OK")
     except Exception as e:
         print(f"   ❌ Error léxico en el payload JSON: {e}")
+        return
+    
+
+    try:
+        header_dict = json.loads(header_json)
+        payload_dict = json.loads(payload_json)
+    except:
+        print("   ❌ Error: JSON no válido para análisis semántico")
+        return
+
+    try:
+        sem = SemanticAnalyzer(header_dict, payload_dict, signature)
+        sem.analyze()
+        print("   ✔ Análisis semántico OK")
+    except Exception as e:
+        print(f"   ❌ Error semántico: {e}")
         return
     
     print("\n========== 🎉 PRUEBA COMPLETADA CON ÉXITO ==========")
