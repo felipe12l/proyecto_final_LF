@@ -2,29 +2,29 @@ import hmac
 import hashlib
 import base64
 
+
 def base64url_encode(data: bytes) -> str:
     return base64.urlsafe_b64encode(data).decode().rstrip("=")
 
-class JWTSigner:
 
-    def __init__(self, algorithm: str, secret_key: str):
-        self.alg = algorithm
-        self.secret = secret_key.encode()
+def _make_signer(digestmod, secret: str):
 
-    def sign(self, token_unsigned: str) -> str:
-        if self.alg == "HS256":
-            signature = hmac.new(
-                self.secret,
-                msg=token_unsigned.encode(),
-                digestmod=hashlib.sha256
-            ).digest()
-            return base64url_encode(signature)
+    secret_bytes = secret.encode("utf-8")
 
-        elif self.alg == "RS256":
-            raise NotImplementedError("RS256 no implementado en este proyecto")
+    def _sign(unsigned_token: str) -> str:
+        signature = hmac.new(
+            secret_bytes,
+            msg=unsigned_token.encode("utf-8"),
+            digestmod=digestmod
+        ).digest()
+        return base64url_encode(signature)
 
-        elif self.alg == "ES256":
-            raise NotImplementedError("ES256 no implementado en este proyecto")
+    return _sign
 
-        else:
-            raise ValueError("Algoritmo no soportado")
+
+def signer_hs256(secret: str):
+    return _make_signer(hashlib.sha256, secret)
+
+
+def signer_hs384(secret: str):
+    return _make_signer(hashlib.sha384, secret)

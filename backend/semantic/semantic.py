@@ -22,28 +22,28 @@ class SemanticAnalyzer:
         self.symbol_table = {}
 
     def analyze(self):
-        self._check_header_required_fields()
-        self._check_header_typ()
-        self._check_header_alg()
-        self._check_signature_required()
+        self.checkHeaderRequiredFields()
+        self.checkHeaderTyp()
+        self.checkHeaderAlg()
+        self.checkSignatureRequired()
 
-        self._check_claim_types()
-        self._check_time_consistency()
-        self._check_missing_or_duplicate_claims()
+        self.checkClaimTypes()
+        self.checkTimeConsistency()
+        self.checkMissingOrDuplicateClaims()
 
         return True
 
-    def heckHeaderRequiredFields(self):
+    def checkHeaderRequiredFields(self):
         if not self.REQUIRED_HEADER.issubset(self.header.keys()):
             raise SemanticError("E1: El header no contiene los campos obligatorios: alg y typ")
 
 
-    def CheckHeaderTyp(self):
+    def checkHeaderTyp(self):
         if self.header.get("typ") != "JWT":
             raise SemanticError("E2: El campo 'typ' debe ser 'JWT'")
 
 
-    def CheckHeaderAlg(self):
+    def checkHeaderAlg(self):
         alg = self.header.get("alg")
         if alg not in self.VALID_ALG:
             raise SemanticError(
@@ -51,12 +51,12 @@ class SemanticAnalyzer:
             )
 
 
-    def CheckSignatureRequired(self):
+    def checkSignatureRequired(self):
         if self.signature is None or self.signature.strip() == "":
             raise SemanticError("E7: El token no contiene firma aun cuando 'alg' lo exige")
 
 
-    def CheckClaimTypes(self):
+    def checkClaimTypes(self):
 
         for key, value in self.payload.items():
 
@@ -72,7 +72,7 @@ class SemanticAnalyzer:
                 raise SemanticError(f"E6: Claim '{key}' no puede ser vacío")
 
 
-    def CheckTimeConsistency(self):
+    def checkTimeConsistency(self):
 
         exp = self.payload.get("exp")
         nbf = self.payload.get("nbf")
@@ -93,7 +93,7 @@ class SemanticAnalyzer:
             raise SemanticError("E5: El token aún no es válido")
 
 
-    def CheckMissingOrDuplicateClaims(self):
+    def checkMissingOrDuplicateClaims(self):
 
         symbol_table = {}
 

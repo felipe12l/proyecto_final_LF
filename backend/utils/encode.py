@@ -17,6 +17,4 @@ class JWTEncoder:
         header_b64 = base64url_encode(header_json)
         payload_b64 = base64url_encode(payload_json)
 
-        token_unsigned = f"{header_b64}.{payload_b64}"
-
-        return token_unsigned, header_b64, payload_b64
+        return f"{header_b64}.{payload_b64}"

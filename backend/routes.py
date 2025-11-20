@@ -1,5 +1,6 @@
 from fastapi import APIRouter, HTTPException
-from controllers.analyze import analyzeJWT
+from controllers.analyzeController import analyzeJWT
+from controllers.encodeController import encode_jwt
 
 router = APIRouter()
 
@@ -9,3 +10,8 @@ def analyze(data: dict):
     if not token:
         raise HTTPException(400, "token requerido")
     return analyzeJWT(token)
+
+
+@router.post("/api/encode")
+def encode(data: dict):
+    return encode_jwt(data)
