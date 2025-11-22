@@ -58,7 +58,8 @@ def analyzeJWT(token):
             header_tokens=header_tokens,
             payload_tokens=payload_tokens
         )
-        parser.analyze() 
+        parser.analyze()
+        derivation_tree = parser.get_derivation_tree()
     except Exception as e:
         return{
             "status": "error",
@@ -97,5 +98,6 @@ def analyzeJWT(token):
             "encoded": encodedToken,
             "header": header_tokens,
             "payload": payload_tokens
-        }
+        },
+        "derivation_tree": derivation_tree
     }
