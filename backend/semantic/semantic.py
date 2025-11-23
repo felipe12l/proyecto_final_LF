@@ -8,7 +8,7 @@ class SemanticAnalyzer:
     
     REQUIRED_HEADER = {"alg", "typ"}
 
-    VALID_ALG = {"HS256", "RS256", "ES256"}
+    VALID_ALG = {"HS256", "HS384"}
 
     RESERVED_CLAIMS = {
         "iss", "sub", "aud", "exp", "nbf", "iat", "jti"
