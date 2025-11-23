@@ -4,9 +4,9 @@ from typing import Any, Dict, Optional, List
 
 from pymongo import MongoClient
 from pymongo.collection import Collection
+from pymongo.server_api import ServerApi
 
-
-MONGO_URI = "mongodb+srv://andresluna01:tester220011!@cluster0.icpam9f.mongodb.net/?appName=Cluster0"
+MONGO_URI = "mongodb+srv://tester:tester220011!@cluster0.icpam9f.mongodb.net/?appName=Cluster0"
 MONGO_DB = "JWT"
 MONGO_TIMEOUT_MS = int(os.getenv("MONGO_TIMEOUT_MS", "2000"))
 
@@ -66,7 +66,7 @@ def clear_analyses() -> int:
     res = coll.delete_many({})
     return res.deleted_count
 
-if __name__ == "__main__":
+""" if __name__ == "__main__":
     try:
         print("Conectando a MongoDB en", MONGO_URI)
         get_client()
@@ -75,4 +75,13 @@ if __name__ == "__main__":
         print("Inserción OK, id =", sample_id)
         print("Últimos documentos:", find_analyses(limit=5))
     except Exception as e:
-        print("Error al conectar a MongoDB:", e)
+        print("Error al conectar a MongoDB:", e) """
+uri = "mongodb+srv://tester:tester123@cluster0.icpam9f.mongodb.net/?appName=Cluster0"
+# Create a new client and connect to the server
+client = MongoClient(uri, server_api=ServerApi('1'))
+# Send a ping to confirm a successful connection
+try:
+    client.admin.command('ping')
+    print("Pinged your deployment. You successfully connected to MongoDB!")
+except Exception as e:
+    print(e)
