@@ -266,26 +266,29 @@ button:disabled {
 }
 
 .result-section {
-  background: #f8f9fa;
+  background: #ffffff;
   padding: 20px;
   border-radius: 8px;
   margin-bottom: 15px;
+  border: 1px solid #e0e0e0;
 }
 
 .result-section h3 {
-  color: #667eea;
+  color: #333;
   margin-bottom: 10px;
   font-size: 1.1rem;
+  font-weight: 700;
 }
 
 pre {
-  background: #1e1e1e;
-  color: #d4d4d4;
+  background: #f5f5f5;
+  color: #222;
   padding: 15px;
   border-radius: 6px;
   overflow-x: auto;
   font-size: 13px;
   line-height: 1.5;
+  border: 1px solid #ddd;
 }
 
 details {
@@ -296,6 +299,7 @@ details {
 summary {
   font-weight: 600;
   padding: 10px;
+  color: #667eea;
   background: white;
   border-radius: 6px;
   margin-bottom: 10px;
@@ -303,6 +307,7 @@ summary {
 
 summary:hover {
   background: #f0f0f0;
+  color: #667eea;
 }
 
 .error-message {
