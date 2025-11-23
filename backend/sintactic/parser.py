@@ -10,11 +10,7 @@ class SyntaxAnalyzer:
         self.encoded = encoded_tokens
         self.header = header_tokens
         self.payload = payload_tokens
-        self.derivation_tree = {
-            "type": "JWT",
-            "rule": "JWT → header.payload.signature (G1)",
-            "children": []
-        }
+        
 
     def checkEncoded(self):
         if len(self.encoded) != 3:
@@ -187,6 +183,4 @@ class SyntaxAnalyzer:
 
         return True
     
-    def get_derivation_tree(self):
-        """Retorna el árbol de derivaciones completo"""
-        return self.derivation_tree
+  
