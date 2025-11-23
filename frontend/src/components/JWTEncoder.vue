@@ -58,8 +58,8 @@ const clearForm = () => {
 }
 
 const copyToken = () => {
-  if (result.value?.token) {
-    navigator.clipboard.writeText(result.value.token)
+  if (result.value?.jwt) {
+    navigator.clipboard.writeText(result.value.jwt)
     alert('Token copiado al portapapeles')
   }
 }
@@ -80,19 +80,10 @@ const addPayloadField = () => {
 
     <div class="form-row">
       <div class="form-group">
-        <label for="header">Header (JSON):</label>
-        <textarea
-          id="header"
-          v-model="header.alg"
-          placeholder="Algoritmo"
-          rows="1"
-          :disabled="loading"
-        ></textarea>
+        <label for="algorithm">Algoritmo:</label>
         <select v-model="header.alg" :disabled="loading" class="select-input">
           <option value="HS256">HS256</option>
           <option value="HS384">HS384</option>
-          <option value="HS512">HS512</option>
-          <option value="RS256">RS256</option>
         </select>
       </div>
     </div>
@@ -162,7 +153,7 @@ const addPayloadField = () => {
           <h3>Token JWT</h3>
           <button @click="copyToken" class="btn-copy">📋 Copiar</button>
         </div>
-        <div class="token-display">{{ result.token }}</div>
+        <div class="token-display">{{ result.jwt }}</div>
       </div>
 
       <div class="result-section" v-if="result.header">
@@ -217,7 +208,8 @@ label {
   color: #333;
 }
 
-textarea, .text-input, .select-input {
+textarea, .select-input {
+  color:#222;
   width: 100%;
   padding: 12px;
   border: 2px solid #e0e0e0;
@@ -225,7 +217,15 @@ textarea, .text-input, .select-input {
   font-size: 14px;
   transition: border-color 0.3s;
 }
+.text-input{
+  width: 100%;
+  padding: 12px;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: 14px;
+  transition: border-color 0.3s;
 
+}
 textarea {
   font-family: 'Courier New', monospace;
   resize: vertical;
@@ -379,16 +379,18 @@ button:disabled {
 }
 
 .result-section {
-  background: #f8f9fa;
+  background: #ffffff;
   padding: 20px;
   border-radius: 8px;
   margin-bottom: 15px;
+  border: 1px solid #e0e0e0;
 }
 
 .result-section h3 {
-  color: #667eea;
+  color: #333;
   margin-bottom: 10px;
   font-size: 1.1rem;
+  font-weight: 700;
 }
 
 .token-header {
@@ -413,23 +415,25 @@ button:disabled {
 }
 
 .token-display {
-  background: #1e1e1e;
-  color: #4ec9b0;
+  background: #f5f5f5;
+  color: #2c5282;
   padding: 15px;
   border-radius: 6px;
   word-break: break-all;
   font-family: 'Courier New', monospace;
   font-size: 13px;
   line-height: 1.6;
+  border: 1px solid #ddd;
 }
 
 pre {
-  background: #1e1e1e;
-  color: #d4d4d4;
+  background: #f5f5f5;
+  color: #222;
   padding: 15px;
   border-radius: 6px;
   overflow-x: auto;
   font-size: 13px;
   line-height: 1.5;
+  border: 1px solid #ddd;
 }
 </style>
