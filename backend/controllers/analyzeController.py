@@ -205,9 +205,8 @@ def analyze_repository():
     Retorna una lista con los resultados de cada token.
     """
     try:
-        db = DatabaseConnector()
         # Recuperar todos los análisis guardados
-        analyses = db.find_analyses(limit=1000)
+        analyses = find_analyses(limit=1000)
         
         # Extraer los tokens
         tokens = [analysis["token"] for analysis in analyses if "token" in analysis]
