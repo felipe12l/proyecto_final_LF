@@ -8,8 +8,8 @@ services:
     restart: always
     ports:
       - "8000:8000"
-    environment:
-      MONGO_URI: "${MONGO_URI}"
+    env_file:
+      - .env
     volumes:
       - ./backend:/app
   
