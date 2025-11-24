@@ -1,4 +1,5 @@
 import os
+import enum
 from datetime import datetime
 from typing import Any, Dict, Optional, List
 
@@ -44,15 +45,27 @@ def init_indexes() -> None:
     
     coll.create_index("token")
  
+def normalize(obj):
+    """Convierte enums y objetos raros en tipos compatibles con MongoDB."""
+    if isinstance(obj, enum.Enum):
+        return obj.value
+    if isinstance(obj, dict):
+        return {k: normalize(v) for v in obj.items()}
+    if isinstance(obj, list):
+        return [normalize(v) for v in obj]
+    return obj
 
 def save_analysis(token: str, result: Dict[str, Any]) -> str:
-    """Inserta un documento de análisis y retorna el id como string."""
     coll = get_collection("analyses")
+
+    safe_result = normalize(result)
+
     doc = {
         "token": token,
-        "result": result,
+        "result": safe_result,
         "created_at": datetime.now(),
     }
+
     res = coll.insert_one(doc)
     return str(res.inserted_id)
 
