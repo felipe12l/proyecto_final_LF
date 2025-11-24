@@ -5,7 +5,7 @@ from lexer.lexerEncode import EncodedLexer
 from lexer.lexerDecode import LexerDecoded
 from sintactic.parser import SyntaxAnalyzer
 from semantic.semantic import SemanticAnalyzer
-
+from database.db import DatabaseConnector
 def analyzeJWT(token):
 
     try:
@@ -59,7 +59,7 @@ def analyzeJWT(token):
             payload_tokens=payload_tokens
         )
         parser.analyze()
-        derivation_tree = parser.get_derivation_tree()
+        
     except Exception as e:
         return{
             "status": "error",
@@ -98,6 +98,54 @@ def analyzeJWT(token):
             "encoded": encodedToken,
             "header": header_tokens,
             "payload": payload_tokens
-        },
-        "derivation_tree": derivation_tree
+        }
     }
+def analyze_list(tokens):
+    results = []
+    try:
+        for token in tokens:
+            result = analyzeJWT(token)
+            results.append(result)
+    except Exception as e:
+        results.append({
+            "status": "error",
+            "phase": "analyze_list",
+            "message": str(e)
+        })
+    return results
+def analyze_repository():
+    """
+    Recupera todos los tokens del repositorio (MongoDB) y los analiza en lote.
+    Retorna una lista con los resultados de cada token.
+    """
+    try:
+        db = DatabaseConnector()
+        # Recuperar todos los análisis guardados
+        analyses = db.find_analyses(limit=1000)
+        
+        # Extraer los tokens
+        tokens = [analysis["token"] for analysis in analyses if "token" in analysis]
+        
+        if not tokens:
+            return {
+                "status": "ok",
+                "message": "No hay tokens en el repositorio",
+                "results": []
+            }
+        
+        # Analizar todos los tokens
+        results = analyze_list(tokens)
+        
+        return {
+            "status": "ok",
+            "total": len(tokens),
+            "results": results
+        }
+        
+    except Exception as e:
+        return {
+            "status": "error",
+            "phase": "analyze_repository",
+            "message": str(e)
+        }
+    

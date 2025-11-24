@@ -12,14 +12,7 @@ services:
       MONGO_URI: "${MONGO_URI}"
     volumes:
       - ./backend:/app
-  db:
-    image: mongo:latest
-    container_name: jwt-mongo
-    restart: always
-    ports:
-      - "27017:27017"
-    volumes:
-      - mongo-data:/data/db
+  
   frontend:
     build:
       context: ./frontend
