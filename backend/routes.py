@@ -2,10 +2,16 @@ from fastapi import APIRouter, HTTPException
 from controllers.analyzeController import analyzeJWT
 from controllers.encodeController import encode_jwt
 from controllers.analyzeController import analyze_repository
-from database.db import save_analysis, normalize
 from controllers.analyzeController import analyze_repository_summary
 from controllers.encodeController import get_encoded_tokens, test_encode_repository
+
+from database.db import DatabaseConnector
+
 router = APIRouter()
+
+def _normalize(data: dict):
+    """Normaliza el diccionario eliminando None y valores inútiles."""
+    return {k: v for k, v in data.items() if v is not None}
 
 @router.post("/api/analyze")
 def analyze(data: dict):
@@ -15,14 +21,17 @@ def analyze(data: dict):
 
     result = analyzeJWT(token)
 
-    save_analysis(token, normalize({
-        "status": result.get("status"),
-        "phase": result.get("phase"),
-        "message": result.get("message"),
-        "header": result.get("header"),        
-        "payload": result.get("payload"),     
-        "signature": result.get("signature"),
-    }))
+    DatabaseConnector.save_analysis(
+        token,
+        _normalize({
+            "status": result.get("status"),
+            "phase": result.get("phase"),
+            "message": result.get("message"),
+            "header": result.get("header"),        
+            "payload": result.get("payload"),     
+            "signature": result.get("signature"),
+        })
+    )
 
     return result
 
