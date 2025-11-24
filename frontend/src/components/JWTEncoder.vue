@@ -58,11 +58,31 @@ const clearForm = () => {
 }
 
 const copyToken = () => {
-  if (result.value?.jwt) {
-    navigator.clipboard.writeText(result.value.jwt)
-    alert('Token copiado al portapapeles')
+  const text = result.value?.jwt;
+  if (!text) return;
+
+  // Método moderno (solo funciona en HTTPS)
+  if (navigator.clipboard && window.isSecureContext) {
+    navigator.clipboard.writeText(text)
+      .then(() => alert("Token copiado al portapapeles"))
+      .catch(() => fallbackCopy(text));
+  } else {
+    // Fallback para HTTP (como tu servidor de AWS)
+    fallbackCopy(text);
   }
-}
+};
+
+const fallbackCopy = (text) => {
+  const textarea = document.createElement("textarea");
+  textarea.value = text;
+  textarea.style.position = "fixed";
+  textarea.style.left = "-9999px";
+  document.body.appendChild(textarea);
+  textarea.select();
+  document.execCommand("copy");
+  document.body.removeChild(textarea);
+  alert("Token copiado al portapapeles");
+};
 
 const addPayloadField = () => {
   const key = prompt('Nombre del campo:')
