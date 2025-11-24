@@ -2,7 +2,8 @@ from fastapi import APIRouter, HTTPException
 from controllers.analyzeController import analyzeJWT
 from controllers.encodeController import encode_jwt
 from controllers.analyzeController import analyze_repository
-from database.db import save_analysis
+from database.db import save_analysis, normalize
+
 router = APIRouter()
 
 @router.post("/api/analyze")
