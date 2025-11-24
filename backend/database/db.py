@@ -6,7 +6,7 @@ from pymongo import MongoClient
 from pymongo.collection import Collection
 
 
-MONGO_URI = "mongodb+srv://andresluna01:tester220011!@cluster0.icpam9f.mongodb.net/?appName=Cluster0"
+MONGO_URI = os.getenv("MONGO_URI") or "mongodb://jwt-mongo:27017"
 MONGO_DB = "JWT"
 MONGO_TIMEOUT_MS = int(os.getenv("MONGO_TIMEOUT_MS", "2000"))
 
