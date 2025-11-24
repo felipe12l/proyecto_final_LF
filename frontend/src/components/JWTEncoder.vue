@@ -88,12 +88,21 @@ const fallbackCopy = (text) => {
   alert("Token copiado al portapapeles");
 };
 
+const numericClaims = ["iat", "exp", "nbf"]
+
 const addPayloadField = () => {
   const key = prompt('Nombre del campo:')
-  if (key && key.trim()) {
-    const value = prompt('Valor del campo:')
-    payload.value[key.trim()] = value || ''
+  if (!key || !key.trim()) return
+
+  const raw = prompt('Valor del campo:')
+  let value = raw
+
+  if (numericClaims.includes(key.trim())) {
+    const num = Number(raw)
+    value = isNaN(num) ? raw : num
   }
+
+  payload.value[key.trim()] = value
 }
 
 const loadTestCases = async () => {
