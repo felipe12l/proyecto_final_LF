@@ -4,7 +4,7 @@ class LexerDecoded:
 
     ALPHABET = set(
         list("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789")
-        + ['{', '}', ':', ',', '"', ' ','-', '_' ]
+        + ['{', '}', ':', ',', '"', ' ','-', '_', '@']
     )
 
     def __init__(self, json_text: str):
