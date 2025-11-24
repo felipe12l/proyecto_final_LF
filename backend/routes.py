@@ -2,7 +2,7 @@ from fastapi import APIRouter, HTTPException
 from controllers.analyzeController import analyzeJWT
 from controllers.encodeController import encode_jwt
 from controllers.analyzeController import analyze_repository
-from database.db import save_analysis, normalize
+from database.db import save_analysis
 router = APIRouter()
 
 @router.post("/api/analyze")
@@ -13,10 +13,12 @@ def analyze(data: dict):
 
     result = analyzeJWT(token)
 
-    from database.db import normalize
-    safe_result = normalize(result)
 
-    save_analysis(token, safe_result)
+    save_analysis(token, {
+        "header": result["header"],
+        "payload": result["payload"],
+        "signature": result["signature"]
+    })
 
     return result
 
