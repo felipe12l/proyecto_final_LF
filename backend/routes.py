@@ -13,7 +13,9 @@ def analyze(data: dict):
 
     result = analyzeJWT(token)
 
+    from database.db import normalize
     safe_result = normalize(result)
+
     save_analysis(token, safe_result)
 
     return result
