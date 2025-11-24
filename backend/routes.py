@@ -4,7 +4,6 @@ from controllers.encodeController import encode_jwt
 from controllers.analyzeController import analyze_repository
 from controllers.analyzeController import analyze_repository_summary
 from controllers.encodeController import get_encoded_tokens, test_encode_repository
-
 from database.db import DatabaseConnector
 
 router = APIRouter()
