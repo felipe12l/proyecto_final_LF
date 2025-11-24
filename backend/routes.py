@@ -13,12 +13,14 @@ def analyze(data: dict):
 
     result = analyzeJWT(token)
 
-
-    save_analysis(token, {
-        "header": result["header"],
-        "payload": result["payload"],
-        "signature": result["signature"]
-    })
+    save_analysis(token, normalize({
+        "status": result.get("status"),
+        "phase": result.get("phase"),
+        "message": result.get("message"),
+        "header": result.get("header"),        
+        "payload": result.get("payload"),     
+        "signature": result.get("signature"),
+    }))
 
     return result
 
