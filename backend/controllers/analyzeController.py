@@ -5,7 +5,8 @@ from lexer.lexerEncode import EncodedLexer
 from lexer.lexerDecode import LexerDecoded
 from sintactic.parser import SyntaxAnalyzer
 from semantic.semantic import SemanticAnalyzer
-from database.db import DatabaseConnector
+from database.db import find_analyses
+
 def analyzeJWT(token):
 
     try:
@@ -119,9 +120,8 @@ def analyze_repository():
     Retorna una lista con los resultados de cada token.
     """
     try:
-        db = DatabaseConnector()
         # Recuperar todos los análisis guardados
-        analyses = db.find_analyses(limit=1000)
+        analyses = find_analyses(limit=1000)
         
         # Extraer los tokens
         tokens = [analysis["token"] for analysis in analyses if "token" in analysis]
