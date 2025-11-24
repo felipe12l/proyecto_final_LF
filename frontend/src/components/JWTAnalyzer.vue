@@ -1,11 +1,12 @@
 <script setup>
 import { ref } from 'vue'
-import DerivationTree from './DerivationTree.vue'
 
 const token = ref('')
 const loading = ref(false)
 const result = ref(null)
 const error = ref(null)
+const testCases = ref(null)
+const loadingTests = ref(false)
 
 const analyzeToken = async () => {
   if (!token.value.trim()) {
@@ -49,6 +50,47 @@ const clearForm = () => {
 const loadSampleToken = () => {
   token.value = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c'
 }
+
+const loadTestCases = async () => {
+  loadingTests.value = true
+  error.value = null
+
+  try {
+    const response = await fetch('/api/get_tests', {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      }
+    })
+
+    const data = await response.json()
+
+    if (!response.ok) {
+      throw new Error(data.detail || 'Error al cargar los casos de prueba')
+    }
+
+    testCases.value = data
+  } catch (err) {
+    error.value = err.message
+  } finally {
+    loadingTests.value = false
+  }
+}
+
+const analyzeTestCase = (testToken) => {
+  token.value = testToken
+  analyzeToken()
+}
+
+const truncateToken = (tokenStr) => {
+  if (!tokenStr || tokenStr === 'N/A') return tokenStr
+  return tokenStr.length > 50 ? tokenStr.substring(0, 50) + '...' : tokenStr
+}
+
+const getTokenFromResult = (testData, index) => {
+  // Intentar obtener el token del análisis original en MongoDB
+  return testData.results[index]?.token || 'N/A'
+}
 </script>
 
 <template>
@@ -74,6 +116,9 @@ const loadSampleToken = () => {
       <button @click="loadSampleToken" :disabled="loading" class="btn-secondary">
         Cargar Ejemplo
       </button>
+      <button @click="loadTestCases" :disabled="loadingTests" class="btn-secondary">
+        {{ loadingTests ? 'Cargando...' : 'Ver Casos de Prueba' }}
+      </button>
       <button @click="clearForm" :disabled="loading" class="btn-secondary">
         Limpiar
       </button>
@@ -82,6 +127,51 @@ const loadSampleToken = () => {
     <!-- Error -->
     <div v-if="error" class="alert alert-error">
       <strong>Error:</strong> {{ error }}
+    </div>
+
+    <!-- Tabla de Casos de Prueba -->
+    <div v-if="testCases" class="test-cases-container">
+      <h3>Casos de Prueba del Repositorio</h3>
+      <p class="test-info">Total de tokens: {{ testCases.total || 0 }}</p>
+      
+      <div class="table-wrapper">
+        <table class="test-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Estado</th>
+              <th>Fase</th>
+              <th>Token</th>
+              <th>Mensaje</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="(test, index) in testCases.results" :key="index">
+              <td>{{ index + 1 }}</td>
+              <td>
+                <span :class="['badge', test.status === 'ok' ? 'badge-success' : 'badge-error']">
+                  {{ test.status }}
+                </span>
+              </td>
+              <td>{{ test.phase || 'N/A' }}</td>
+              <td class="token-cell">
+                <code>{{ truncateToken(testCases.results[index]?.token || 'N/A') }}</code>
+              </td>
+              <td>{{ test.message || (test.status === 'ok' ? '✓ Válido' : 'Error') }}</td>
+              <td>
+                <button 
+                  @click="analyzeTestCase(getTokenFromResult(testCases, index))" 
+                  class="btn-small"
+                  title="Analizar este token"
+                >
+                  Analizar
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
 
     <!-- Resultado exitoso -->
@@ -118,9 +208,6 @@ const loadSampleToken = () => {
           <pre>{{ JSON.stringify(result.tokens.payload, null, 2) }}</pre>
         </details>
       </div>
-
-      <!-- Árbol de Derivaciones -->
-      <DerivationTree v-if="result.derivation_tree" :tree="result.derivation_tree" />
     </div>
 
     <!-- Resultado con error -->
@@ -318,5 +405,103 @@ summary:hover {
 
 .error-result {
   border-left: 4px solid #c33;
+}
+
+/* Estilos para la tabla de casos de prueba */
+.test-cases-container {
+  margin-top: 30px;
+  padding: 20px;
+  background: #ffffff;
+  border-radius: 8px;
+  border: 1px solid #e0e0e0;
+}
+
+.test-cases-container h3 {
+  color: #333;
+  margin-bottom: 10px;
+}
+
+.test-info {
+  color: #666;
+  margin-bottom: 15px;
+  font-size: 0.95rem;
+}
+
+.table-wrapper {
+  overflow-x: auto;
+}
+
+.test-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+.test-table thead {
+  background: #f8f9fa;
+}
+
+.test-table th {
+  padding: 12px;
+  text-align: left;
+  font-weight: 600;
+  color: #333;
+  border-bottom: 2px solid #dee2e6;
+}
+
+.test-table td {
+  padding: 10px 12px;
+  border-bottom: 1px solid #e9ecef;
+  color: #333;
+}
+
+.test-table tbody tr:hover {
+  background: #f8f9fa;
+}
+
+.token-cell {
+  max-width: 300px;
+  word-break: break-all;
+}
+
+.token-cell code {
+  background: #f5f5f5;
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-size: 0.85rem;
+  color: #222;
+}
+
+.badge {
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.badge-success {
+  background: #d4edda;
+  color: #155724;
+}
+
+.badge-error {
+  background: #f8d7da;
+  color: #721c24;
+}
+
+.btn-small {
+  padding: 6px 12px;
+  background: #667eea;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  transition: background 0.3s;
+}
+
+.btn-small:hover {
+  background: #764ba2;
 }
 </style>

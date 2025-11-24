@@ -67,7 +67,7 @@ class DatabaseConnector:
         coll = self.get_collection("analyses")
         res = coll.delete_many({})
         return res.deleted_count
-
+""" 
 if __name__ == "__main__":
     try:
         print("Conectando a MongoDB en", MONGO_URI)
@@ -78,3 +78,4 @@ if __name__ == "__main__":
         
     except Exception as e:
         print("Error al conectar a MongoDB:", e)
+ """
