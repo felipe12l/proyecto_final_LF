@@ -49,10 +49,13 @@ def normalize(obj):
     """Convierte enums y objetos raros en tipos compatibles con MongoDB."""
     if isinstance(obj, enum.Enum):
         return obj.value
+
     if isinstance(obj, dict):
-        return {k: normalize(v) for v in obj.items()}
+        return {key: normalize(value) for key, value in obj.items()}
+
     if isinstance(obj, list):
-        return [normalize(v) for v in obj]
+        return [normalize(value) for value in obj]
+
     return obj
 
 def save_analysis(token: str, result: Dict[str, Any]) -> str:
