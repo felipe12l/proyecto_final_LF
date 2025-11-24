@@ -13,8 +13,15 @@ def analyze(data: dict):
 
     result = analyzeJWT(token)
 
-    if result.get("status") == "ok":
-        save_analysis(token, result)
+    if result.get("status") != "ok":
+        return result
+
+    save_analysis(token, {
+        "header": result["header"],
+        "payload": result["payload"],
+        "signature": result["signature"]
+    })
+
     return result
 
 
