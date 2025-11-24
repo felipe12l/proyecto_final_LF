@@ -73,24 +73,21 @@ class SemanticAnalyzer:
 
 
     def checkTimeConsistency(self):
-
         exp = self.payload.get("exp")
         nbf = self.payload.get("nbf")
         iat = self.payload.get("iat")
 
-        if exp is None or nbf is None or iat is None:
-            return
-
-        if not (nbf <= iat <= exp):
-            raise SemanticError("E6: El orden temporal debe cumplir: nbf ≤ iat ≤ exp")
-
         now = int(time.time())
 
-        if exp < now:
+        if exp is not None and exp < now:
             raise SemanticError("E4: El token está expirado")
 
-        if nbf > now:
+        if nbf is not None and nbf > now:
             raise SemanticError("E5: El token aún no es válido")
+
+        if nbf is not None and iat is not None and exp is not None:
+            if not (nbf <= iat <= exp):
+                raise SemanticError("E6: El orden temporal debe cumplir: nbf ≤ iat ≤ exp")
 
 
     def checkMissingOrDuplicateClaims(self):
