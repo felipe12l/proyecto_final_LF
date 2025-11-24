@@ -58,17 +58,49 @@ const clearForm = () => {
 }
 
 const copyToken = () => {
-  if (result.value?.jwt) {
-    navigator.clipboard.writeText(result.value.jwt)
-    alert('Token copiado al portapapeles')
+  const text = result.value?.jwt;
+  if (!text) return;
+
+  // Método moderno (solo funciona en HTTPS)
+  if (navigator.clipboard && window.isSecureContext) {
+    navigator.clipboard.writeText(text)
+      .then(() => alert("Token copiado al portapapeles"))
+      .catch(() => fallbackCopy(text));
+  } else {
+    // Fallback para HTTP (como tu servidor de AWS)
+    fallbackCopy(text);
   }
-}
+};
+
+const fallbackCopy = (text) => {
+  const textarea = document.createElement("textarea");
+  textarea.value = text;
+  textarea.style.position = "fixed";
+  textarea.style.left = "-9999px";
+  document.body.appendChild(textarea);
+  textarea.select();
+  document.execCommand("copy");
+  document.body.removeChild(textarea);
+  alert("Token copiado al portapapeles");
+};
 
 const addPayloadField = () => {
   const key = prompt('Nombre del campo:')
   if (key && key.trim()) {
     const value = prompt('Valor del campo:')
     payload.value[key.trim()] = value || ''
+  }
+}
+
+const numericClaims = ["iat", "exp", "nbf"]
+
+function convertField(key) {
+  if (numericClaims.includes(key)) {
+    const val = payload.value[key]
+    const num = Number(val)
+    if (!isNaN(num)) {
+      payload.value[key] = num
+    }
   }
 }
 </script>
@@ -100,6 +132,7 @@ const addPayloadField = () => {
           />
           <input 
             v-model="payload[key]" 
+            @input="convertField(key)"
             type="text" 
             class="field-value"
             :disabled="loading"
