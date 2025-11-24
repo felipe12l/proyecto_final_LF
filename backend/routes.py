@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException
 from controllers.analyzeController import analyzeJWT, analyze_repository, analyze_repository_summary
-from controllers.encodeController import encode_jwt
+from controllers.encodeController import encode_jwt, get_encoded_tokens, test_encode_repository
 router = APIRouter()
 
 @router.post("/api/analyze")
@@ -14,6 +14,7 @@ def analyze(data: dict):
 @router.post("/api/encode")
 def encode(data: dict):
     return encode_jwt(data)
+
 @router.get("/api/get_tests")
 def get_tests():
     return analyze_repository()
@@ -21,3 +22,12 @@ def get_tests():
 @router.get("/api/analyze_all")
 def analyze_all():
     return analyze_repository_summary()
+
+@router.get("/api/get_encoded_tests")
+def get_encoded_tests():
+    return get_encoded_tokens()
+
+@router.get("/api/test_encode_all")
+def test_encode_all():
+    """Ejecuta pruebas de encoding para todos los tokens guardados."""
+    return test_encode_repository()

@@ -227,16 +227,19 @@ const getTokenFromResult = (testData, index) => {
 .analyzer-container {
   max-width: 900px;
   margin: 0 auto;
+  padding: 0 15px;
 }
 
 h2 {
   color: #333;
   margin-bottom: 10px;
+  font-size: clamp(1.5rem, 4vw, 2rem);
 }
 
 .description {
   color: #666;
   margin-bottom: 25px;
+  font-size: clamp(0.875rem, 2vw, 1rem);
 }
 
 .form-group {
@@ -248,6 +251,7 @@ label {
   font-weight: 600;
   margin-bottom: 8px;
   color: #333;
+  font-size: clamp(0.875rem, 2vw, 1rem);
 }
 
 textarea {
@@ -256,9 +260,10 @@ textarea {
   border: 2px solid #e0e0e0;
   border-radius: 8px;
   font-family: 'Courier New', monospace;
-  font-size: 14px;
+  font-size: clamp(0.875rem, 2vw, 1rem);
   resize: vertical;
   transition: border-color 0.3s;
+  box-sizing: border-box;
 }
 
 textarea:focus {
@@ -282,7 +287,7 @@ button {
   padding: 12px 24px;
   border: none;
   border-radius: 8px;
-  font-size: 1rem;
+  font-size: clamp(0.875rem, 2vw, 1rem);
   cursor: pointer;
   transition: all 0.3s;
   font-weight: 500;
@@ -291,6 +296,8 @@ button {
 .btn-primary {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
+  flex: 1;
+  min-width: 140px;
 }
 
 .btn-primary:hover:not(:disabled) {
@@ -301,6 +308,8 @@ button {
 .btn-secondary {
   background: #f0f0f0;
   color: #333;
+  flex: 1;
+  min-width: 120px;
 }
 
 .btn-secondary:hover:not(:disabled) {
@@ -316,6 +325,7 @@ button:disabled {
   padding: 15px;
   border-radius: 8px;
   margin-bottom: 20px;
+  font-size: clamp(0.875rem, 2vw, 1rem);
 }
 
 .alert-error {
@@ -340,6 +350,7 @@ button:disabled {
   border-radius: 20px;
   font-weight: 600;
   margin-bottom: 20px;
+  font-size: clamp(0.875rem, 2vw, 1rem);
 }
 
 .success-badge {
@@ -354,7 +365,7 @@ button:disabled {
 
 .result-section {
   background: #ffffff;
-  padding: 20px;
+  padding: 15px;
   border-radius: 8px;
   margin-bottom: 15px;
   border: 1px solid #e0e0e0;
@@ -363,7 +374,7 @@ button:disabled {
 .result-section h3 {
   color: #333;
   margin-bottom: 10px;
-  font-size: 1.1rem;
+  font-size: clamp(1rem, 2.5vw, 1.1rem);
   font-weight: 700;
 }
 
@@ -373,7 +384,7 @@ pre {
   padding: 15px;
   border-radius: 6px;
   overflow-x: auto;
-  font-size: 13px;
+  font-size: clamp(0.75rem, 2vw, 0.875rem);
   line-height: 1.5;
   border: 1px solid #ddd;
 }
@@ -390,6 +401,7 @@ summary {
   background: white;
   border-radius: 6px;
   margin-bottom: 10px;
+  font-size: clamp(0.875rem, 2vw, 1rem);
 }
 
 summary:hover {
@@ -401,6 +413,7 @@ summary:hover {
   color: #c33;
   font-weight: 600;
   margin-bottom: 10px;
+  font-size: clamp(0.875rem, 2vw, 1rem);
 }
 
 .error-result {
@@ -410,7 +423,7 @@ summary:hover {
 /* Estilos para la tabla de casos de prueba */
 .test-cases-container {
   margin-top: 30px;
-  padding: 20px;
+  padding: 15px;
   background: #ffffff;
   border-radius: 8px;
   border: 1px solid #e0e0e0;
@@ -419,22 +432,25 @@ summary:hover {
 .test-cases-container h3 {
   color: #333;
   margin-bottom: 10px;
+  font-size: clamp(1rem, 2.5vw, 1.2rem);
 }
 
 .test-info {
   color: #666;
   margin-bottom: 15px;
-  font-size: 0.95rem;
+  font-size: clamp(0.875rem, 2vw, 0.95rem);
 }
 
 .table-wrapper {
   overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 .test-table {
   width: 100%;
+  min-width: 700px;
   border-collapse: collapse;
-  font-size: 0.9rem;
+  font-size: clamp(0.75rem, 2vw, 0.9rem);
 }
 
 .test-table thead {
@@ -442,17 +458,19 @@ summary:hover {
 }
 
 .test-table th {
-  padding: 12px;
+  padding: 10px 8px;
   text-align: left;
   font-weight: 600;
   color: #333;
   border-bottom: 2px solid #dee2e6;
+  white-space: nowrap;
 }
 
 .test-table td {
-  padding: 10px 12px;
+  padding: 10px 8px;
   border-bottom: 1px solid #e9ecef;
   color: #333;
+  vertical-align: middle;
 }
 
 .test-table tbody tr:hover {
@@ -460,24 +478,29 @@ summary:hover {
 }
 
 .token-cell {
-  max-width: 300px;
+  max-width: 200px;
   word-break: break-all;
 }
 
 .token-cell code {
   background: #f5f5f5;
-  padding: 2px 6px;
+  padding: 4px 8px;
   border-radius: 3px;
-  font-size: 0.85rem;
+  font-size: clamp(0.7rem, 1.8vw, 0.85rem);
   color: #222;
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .badge {
   padding: 4px 10px;
   border-radius: 12px;
-  font-size: 0.8rem;
+  font-size: clamp(0.7rem, 1.8vw, 0.8rem);
   font-weight: 600;
   text-transform: uppercase;
+  display: inline-block;
+  white-space: nowrap;
 }
 
 .badge-success {
@@ -497,11 +520,56 @@ summary:hover {
   border: none;
   border-radius: 4px;
   cursor: pointer;
-  font-size: 0.85rem;
+  font-size: clamp(0.75rem, 2vw, 0.85rem);
   transition: background 0.3s;
+  white-space: nowrap;
 }
 
 .btn-small:hover {
   background: #764ba2;
+}
+
+/* Media Queries para Responsive */
+@media (max-width: 768px) {
+  .analyzer-container {
+    padding: 0 10px;
+  }
+  
+  .button-group {
+    flex-direction: column;
+  }
+  
+  .btn-primary, .btn-secondary {
+    width: 100%;
+    min-width: 100%;
+  }
+  
+  .test-table {
+    min-width: 600px;
+  }
+  
+  .test-table th,
+  .test-table td {
+    padding: 8px 6px;
+  }
+}
+
+@media (max-width: 480px) {
+  .test-cases-container {
+    padding: 10px;
+  }
+  
+  .result-section {
+    padding: 12px;
+  }
+  
+  .test-table {
+    min-width: 500px;
+    font-size: 0.75rem;
+  }
+  
+  .token-cell {
+    max-width: 150px;
+  }
 }
 </style>

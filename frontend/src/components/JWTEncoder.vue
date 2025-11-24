@@ -16,6 +16,10 @@ const secret = ref('your-secret-key')
 const loading = ref(false)
 const result = ref(null)
 const error = ref(null)
+const testCases = ref(null)
+const loadingTests = ref(false)
+const testResults = ref(null)
+const loadingTestResults = ref(false)
 
 const encodeToken = async () => {
   loading.value = true
@@ -90,6 +94,70 @@ const addPayloadField = () => {
     const value = prompt('Valor del campo:')
     payload.value[key.trim()] = value || ''
   }
+}
+
+const loadTestCases = async () => {
+  loadingTests.value = true
+  error.value = null
+
+  try {
+    const response = await fetch('/api/get_encoded_tests', {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      }
+    })
+
+    const data = await response.json()
+
+    if (!response.ok) {
+      throw new Error(data.detail || 'Error al cargar los casos de prueba')
+    }
+
+    testCases.value = data
+  } catch (err) {
+    error.value = err.message
+  } finally {
+    loadingTests.value = false
+  }
+}
+
+const runEncoderTests = async () => {
+  loadingTestResults.value = true
+  error.value = null
+  testResults.value = null
+
+  try {
+    const response = await fetch('/api/test_encode_all', {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      }
+    })
+
+    const data = await response.json()
+
+    if (!response.ok) {
+      throw new Error(data.detail || 'Error al ejecutar las pruebas')
+    }
+
+    testResults.value = data
+  } catch (err) {
+    error.value = err.message
+  } finally {
+    loadingTestResults.value = false
+  }
+}
+
+const loadTestCase = (testCase) => {
+  header.value = testCase.header
+  payload.value = testCase.payload
+  secret.value = testCase.secret || 'your-secret-key'
+}
+
+const truncateToken = (tokenStr) => {
+  if (!tokenStr) return 'N/A'
+  return tokenStr.length > 50 ? tokenStr.substring(0, 50) + '...' : tokenStr
 }
 
 const numericClaims = ["iat", "exp", "nbf"]
@@ -167,6 +235,12 @@ function convertField(key) {
       <button @click="encodeToken" :disabled="loading" class="btn-primary">
         {{ loading ? 'Generando...' : 'Generar Token' }}
       </button>
+      <button @click="loadTestCases" :disabled="loadingTests" class="btn-secondary">
+        {{ loadingTests ? 'Cargando...' : 'Ver Casos de Prueba' }}
+      </button>
+      <button @click="runEncoderTests" :disabled="loadingTestResults" class="btn-secondary">
+        {{ loadingTestResults ? 'Ejecutando...' : 'Ejecutar Pruebas' }}
+      </button>
       <button @click="clearForm" :disabled="loading" class="btn-secondary">
         Limpiar
       </button>
@@ -175,6 +249,120 @@ function convertField(key) {
     <!-- Error -->
     <div v-if="error" class="alert alert-error">
       <strong>Error:</strong> {{ error }}
+    </div>
+
+    <!-- Resultados de Pruebas -->
+    <div v-if="testResults" class="test-results-container">
+      <h3>Resultados de Pruebas de Encoding</h3>
+      <div class="summary-stats">
+        <div class="stat-card stat-total">
+          <div class="stat-number">{{ testResults.summary?.total || 0 }}</div>
+          <div class="stat-label">Total</div>
+        </div>
+        <div class="stat-card stat-passed">
+          <div class="stat-number">{{ testResults.summary?.passed || 0 }}</div>
+          <div class="stat-label">Exitosas</div>
+        </div>
+        <div class="stat-card stat-failed">
+          <div class="stat-number">{{ testResults.summary?.failed || 0 }}</div>
+          <div class="stat-label">Fallidas</div>
+        </div>
+      </div>
+
+      <div class="table-wrapper">
+        <table class="test-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Estado</th>
+              <th>Algoritmo</th>
+              <th>Mensaje</th>
+              <th>Match</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="(testResult, index) in testResults.results" :key="index">
+              <td>{{ index + 1 }}</td>
+              <td>
+                <span 
+                  class="badge" 
+                  :class="testResult.status === 'ok' ? 'badge-success' : 'badge-error'"
+                >
+                  {{ testResult.status === 'ok' ? '✓ OK' : '✗ Error' }}
+                </span>
+              </td>
+              <td>
+                <span class="badge badge-algo">{{ testResult.algorithm || testResult.header?.alg || 'N/A' }}</span>
+              </td>
+              <td class="message-cell">{{ testResult.message || 'N/A' }}</td>
+              <td>
+                <span 
+                  v-if="testResult.match !== undefined"
+                  class="badge" 
+                  :class="testResult.match ? 'badge-success' : 'badge-warning'"
+                >
+                  {{ testResult.match ? '✓ Coincide' : '⚠ Difiere' }}
+                </span>
+                <span v-else class="text-muted">-</span>
+              </td>
+              <td>
+                <button 
+                  v-if="testResult.header && testResult.payload"
+                  @click="loadTestCase(testResult)" 
+                  class="btn-small"
+                  title="Cargar este caso"
+                >
+                  Cargar
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Tabla de Casos de Prueba -->
+    <div v-if="testCases" class="test-cases-container">
+      <h3>Casos de Prueba de Tokens Encriptados</h3>
+      <p class="test-info">Total de tokens: {{ testCases.total || 0 }}</p>
+      
+      <div class="table-wrapper">
+        <table class="test-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Algoritmo</th>
+              <th>Token JWT</th>
+              <th>Payload</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="(test, index) in testCases.results" :key="index">
+              <td>{{ index + 1 }}</td>
+              <td>
+                <span class="badge badge-algo">{{ test.header?.alg || 'N/A' }}</span>
+              </td>
+              <td class="token-cell">
+                <code>{{ truncateToken(test.jwt) }}</code>
+              </td>
+              <td class="payload-cell">
+                <code>{{ JSON.stringify(test.payload).substring(0, 30) }}...</code>
+              </td>
+              <td>
+                <button 
+                  @click="loadTestCase(test)" 
+                  class="btn-small"
+                  title="Cargar este caso"
+                >
+                  Cargar
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
 
     <!-- Resultado -->
@@ -211,16 +399,19 @@ function convertField(key) {
 .encoder-container {
   max-width: 900px;
   margin: 0 auto;
+  padding: 0 15px;
 }
 
 h2 {
   color: #333;
   margin-bottom: 10px;
+  font-size: clamp(1.5rem, 4vw, 2rem);
 }
 
 .description {
   color: #666;
   margin-bottom: 25px;
+  font-size: clamp(0.875rem, 2vw, 1rem);
 }
 
 .form-row {
@@ -239,6 +430,7 @@ label {
   font-weight: 600;
   margin-bottom: 8px;
   color: #333;
+  font-size: clamp(0.875rem, 2vw, 1rem);
 }
 
 textarea, .select-input {
@@ -247,17 +439,18 @@ textarea, .select-input {
   padding: 12px;
   border: 2px solid #e0e0e0;
   border-radius: 8px;
-  font-size: 14px;
+  font-size: clamp(0.875rem, 2vw, 1rem);
   transition: border-color 0.3s;
+  box-sizing: border-box;
 }
 .text-input{
   width: 100%;
   padding: 12px;
   border: 2px solid #e0e0e0;
   border-radius: 8px;
-  font-size: 14px;
+  font-size: clamp(0.875rem, 2vw, 1rem);
   transition: border-color 0.3s;
-
+  box-sizing: border-box;
 }
 textarea {
   font-family: 'Courier New', monospace;
@@ -285,22 +478,27 @@ textarea {
   display: flex;
   gap: 10px;
   margin-bottom: 10px;
+  flex-wrap: wrap;
 }
 
 .field-key {
   flex: 1;
+  min-width: 120px;
   padding: 10px;
   border: 1px solid #ddd;
   border-radius: 6px;
   background: #f0f0f0;
   font-weight: 600;
+  font-size: clamp(0.875rem, 2vw, 1rem);
 }
 
 .field-value {
   flex: 2;
+  min-width: 150px;
   padding: 10px;
   border: 2px solid #e0e0e0;
   border-radius: 6px;
+  font-size: clamp(0.875rem, 2vw, 1rem);
 }
 
 .field-value:focus {
@@ -316,6 +514,7 @@ textarea {
   border-radius: 6px;
   cursor: pointer;
   transition: background 0.3s;
+  white-space: nowrap;
 }
 
 .btn-delete:hover:not(:disabled) {
@@ -332,6 +531,7 @@ textarea {
   cursor: pointer;
   font-weight: 500;
   transition: background 0.3s;
+  font-size: clamp(0.875rem, 2vw, 1rem);
 }
 
 .btn-add:hover:not(:disabled) {
@@ -349,7 +549,7 @@ button {
   padding: 12px 24px;
   border: none;
   border-radius: 8px;
-  font-size: 1rem;
+  font-size: clamp(0.875rem, 2vw, 1rem);
   cursor: pointer;
   transition: all 0.3s;
   font-weight: 500;
@@ -358,6 +558,8 @@ button {
 .btn-primary {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
+  flex: 1;
+  min-width: 140px;
 }
 
 .btn-primary:hover:not(:disabled) {
@@ -368,6 +570,8 @@ button {
 .btn-secondary {
   background: #f0f0f0;
   color: #333;
+  flex: 1;
+  min-width: 120px;
 }
 
 .btn-secondary:hover:not(:disabled) {
@@ -413,7 +617,7 @@ button:disabled {
 
 .result-section {
   background: #ffffff;
-  padding: 20px;
+  padding: 15px;
   border-radius: 8px;
   margin-bottom: 15px;
   border: 1px solid #e0e0e0;
@@ -422,7 +626,7 @@ button:disabled {
 .result-section h3 {
   color: #333;
   margin-bottom: 10px;
-  font-size: 1.1rem;
+  font-size: clamp(1rem, 2.5vw, 1.1rem);
   font-weight: 700;
 }
 
@@ -431,6 +635,8 @@ button:disabled {
   justify-content: space-between;
   align-items: center;
   margin-bottom: 10px;
+  flex-wrap: wrap;
+  gap: 10px;
 }
 
 .btn-copy {
@@ -440,7 +646,8 @@ button:disabled {
   border: none;
   border-radius: 6px;
   cursor: pointer;
-  font-size: 0.9rem;
+  font-size: clamp(0.8rem, 2vw, 0.9rem);
+  white-space: nowrap;
 }
 
 .btn-copy:hover {
@@ -454,7 +661,7 @@ button:disabled {
   border-radius: 6px;
   word-break: break-all;
   font-family: 'Courier New', monospace;
-  font-size: 13px;
+  font-size: clamp(0.75rem, 2vw, 0.875rem);
   line-height: 1.6;
   border: 1px solid #ddd;
 }
@@ -465,8 +672,246 @@ pre {
   padding: 15px;
   border-radius: 6px;
   overflow-x: auto;
-  font-size: 13px;
+  font-size: clamp(0.75rem, 2vw, 0.875rem);
   line-height: 1.5;
   border: 1px solid #ddd;
+}
+
+/* Estilos para la tabla de casos de prueba */
+.test-cases-container, .test-results-container {
+  margin-top: 30px;
+  padding: 15px;
+  background: #ffffff;
+  border-radius: 8px;
+  border: 1px solid #e0e0e0;
+}
+
+.test-cases-container h3, .test-results-container h3 {
+  color: #333;
+  margin-bottom: 10px;
+  font-size: clamp(1rem, 2.5vw, 1.2rem);
+}
+
+.test-info {
+  color: #666;
+  margin-bottom: 15px;
+  font-size: clamp(0.875rem, 2vw, 0.95rem);
+}
+
+/* Estilos para las estadísticas de pruebas */
+.summary-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 15px;
+  margin-bottom: 20px;
+}
+
+.stat-card {
+  padding: 20px;
+  border-radius: 8px;
+  text-align: center;
+  border: 2px solid;
+}
+
+.stat-total {
+  background: #e3f2fd;
+  border-color: #2196f3;
+}
+
+.stat-passed {
+  background: #e8f5e9;
+  border-color: #4caf50;
+}
+
+.stat-failed {
+  background: #ffebee;
+  border-color: #f44336;
+}
+
+.stat-number {
+  font-size: clamp(1.75rem, 4vw, 2.5rem);
+  font-weight: 700;
+  margin-bottom: 5px;
+}
+
+.stat-total .stat-number {
+  color: #2196f3;
+}
+
+.stat-passed .stat-number {
+  color: #4caf50;
+}
+
+.stat-failed .stat-number {
+  color: #f44336;
+}
+
+.stat-label {
+  font-size: clamp(0.875rem, 2vw, 1rem);
+  font-weight: 600;
+  color: #666;
+}
+
+.table-wrapper {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.test-table {
+  width: 100%;
+  min-width: 600px;
+  border-collapse: collapse;
+  font-size: clamp(0.75rem, 2vw, 0.9rem);
+}
+
+.test-table thead {
+  background: #f8f9fa;
+}
+
+.test-table th {
+  padding: 10px 8px;
+  text-align: left;
+  font-weight: 600;
+  color: #333;
+  border-bottom: 2px solid #dee2e6;
+  white-space: nowrap;
+}
+
+.test-table td {
+  padding: 10px 8px;
+  border-bottom: 1px solid #e9ecef;
+  color: #333;
+  vertical-align: middle;
+}
+
+.test-table tbody tr:hover {
+  background: #f8f9fa;
+}
+
+.token-cell, .payload-cell, .message-cell {
+  max-width: 200px;
+  word-break: break-all;
+}
+
+.token-cell code, .payload-cell code {
+  background: #f5f5f5;
+  padding: 4px 8px;
+  border-radius: 3px;
+  font-size: clamp(0.7rem, 1.8vw, 0.85rem);
+  color: #222;
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.badge {
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: clamp(0.7rem, 1.8vw, 0.8rem);
+  font-weight: 600;
+  text-transform: uppercase;
+  display: inline-block;
+  white-space: nowrap;
+}
+
+.badge-algo {
+  background: #e3f2fd;
+  color: #1976d2;
+}
+
+.badge-success {
+  background: #d4edda;
+  color: #155724;
+}
+
+.badge-error {
+  background: #f8d7da;
+  color: #721c24;
+}
+
+.badge-warning {
+  background: #fff3cd;
+  color: #856404;
+}
+
+.text-muted {
+  color: #999;
+}
+
+.btn-small {
+  padding: 6px 12px;
+  background: #667eea;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: clamp(0.75rem, 2vw, 0.85rem);
+  transition: background 0.3s;
+  white-space: nowrap;
+}
+
+.btn-small:hover {
+  background: #764ba2;
+}
+
+/* Media Queries para Responsive */
+@media (max-width: 768px) {
+  .encoder-container {
+    padding: 0 10px;
+  }
+  
+  .payload-field {
+    flex-direction: column;
+  }
+  
+  .field-key, .field-value {
+    min-width: 100%;
+  }
+  
+  .button-group {
+    flex-direction: column;
+  }
+  
+  .btn-primary, .btn-secondary {
+    width: 100%;
+    min-width: 100%;
+  }
+  
+  .token-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .btn-copy {
+    width: 100%;
+  }
+  
+  .test-table {
+    min-width: 500px;
+  }
+  
+  .test-table th,
+  .test-table td {
+    padding: 8px 6px;
+  }
+}
+
+@media (max-width: 480px) {
+  .test-cases-container {
+    padding: 10px;
+  }
+  
+  .result-section {
+    padding: 12px;
+  }
+  
+  .test-table {
+    min-width: 450px;
+    font-size: 0.75rem;
+  }
+  
+  .token-cell, .payload-cell {
+    max-width: 150px;
+  }
 }
 </style>

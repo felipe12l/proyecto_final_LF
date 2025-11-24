@@ -46,7 +46,7 @@ body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   min-height: 100vh;
-  padding: 20px;
+  padding: 15px;
 }
 
 .app-container {
@@ -61,12 +61,12 @@ header {
 }
 
 header h1 {
-  font-size: 2.5rem;
+  font-size: clamp(1.75rem, 5vw, 2.5rem);
   margin-bottom: 10px;
 }
 
 header p {
-  font-size: 1.1rem;
+  font-size: clamp(0.9rem, 2.5vw, 1.1rem);
   opacity: 0.9;
 }
 
@@ -75,6 +75,7 @@ header p {
   gap: 10px;
   margin-bottom: 20px;
   justify-content: center;
+  flex-wrap: wrap;
 }
 
 .tabs button {
@@ -82,7 +83,7 @@ header p {
   border: none;
   background: rgba(255, 255, 255, 0.2);
   color: white;
-  font-size: 1rem;
+  font-size: clamp(0.875rem, 2.5vw, 1rem);
   cursor: pointer;
   border-radius: 8px;
   transition: all 0.3s;
@@ -101,7 +102,47 @@ header p {
 .tab-content {
   background: white;
   border-radius: 12px;
-  padding: 30px;
+  padding: clamp(15px, 4vw, 30px);
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+}
+
+/* Media Queries para Responsive */
+@media (max-width: 768px) {
+  body {
+    padding: 10px;
+  }
+  
+  header {
+    margin-bottom: 20px;
+  }
+  
+  .tabs {
+    gap: 8px;
+    margin-bottom: 15px;
+  }
+  
+  .tabs button {
+    padding: 10px 20px;
+    flex: 1;
+    min-width: 120px;
+  }
+  
+  .tab-content {
+    border-radius: 8px;
+  }
+}
+
+@media (max-width: 480px) {
+  body {
+    padding: 8px;
+  }
+  
+  .tabs {
+    flex-direction: column;
+  }
+  
+  .tabs button {
+    width: 100%;
+  }
 }
 </style>

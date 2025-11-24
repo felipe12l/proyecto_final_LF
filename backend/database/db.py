@@ -79,15 +79,32 @@ class DatabaseConnector:
         coll = cls.get_collection("analyses")
         res = coll.delete_many({})
         return res.deleted_count
-""" 
-if __name__ == "__main__":
-    try:
-        print("Conectando a MongoDB en", MONGO_URI)
-        DatabaseConnector.get_client()
-        DatabaseConnector.init_indexes()
-        sample_id = DatabaseConnector.save_analysis("prueba-token", {"status": "ok", "note": "ejemplo"})
-        print("Inserción OK, id =", sample_id)
-        
-    except Exception as e:
-        print("Error al conectar a MongoDB:", e)
- """
+    
+    @classmethod
+    def save_encoded_token(cls, request_data: Dict[str, Any], jwt_result: Dict[str, Any]) -> str:
+        """Inserta un documento de token encriptado y retorna el id como string."""
+        coll = cls.get_collection("encoded_tokens")
+        doc = {
+            "header": request_data.get("header"),
+            "payload": request_data.get("payload"),
+            "secret": request_data.get("secret"),
+            "jwt": jwt_result.get("jwt"),
+            "created_at": datetime.now(),
+        }
+        res = coll.insert_one(doc)
+        return str(res.inserted_id)
+    
+    @classmethod
+    def find_encoded_tokens(cls, filter_query: Dict[str, Any] = None, limit: int = 50) -> List[Dict[str, Any]]:
+        """Consulta documentos en la colección `encoded_tokens`."""
+        coll = cls.get_collection("encoded_tokens")
+        q = filter_query or {}
+        cursor = coll.find(q).sort("created_at", -1).limit(limit)
+        return list(cursor)
+    
+    @classmethod
+    def clear_encoded_tokens(cls) -> int:
+        """Elimina todos los documentos en la colección `encoded_tokens` y retorna el conteo."""
+        coll = cls.get_collection("encoded_tokens")
+        res = coll.delete_many({})
+        return res.deleted_count
