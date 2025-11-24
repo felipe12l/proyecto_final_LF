@@ -206,7 +206,7 @@ def analyze_repository():
     """
     try:
         # Recuperar todos los análisis guardados
-        analyses = DatabaseConnector.find_analyses(limit=1000)
+        analyses = DatabaseConnector.find_analyses({}, 1000)
         
         # Extraer los tokens
         tokens = [analysis["token"] for analysis in analyses if "token" in analysis]
@@ -237,7 +237,7 @@ def analyze_repository():
 def analyze_repository_summary():
     """Analiza todos los tokens del repositorio sin detalles, solo status."""
     try:
-        analyses = DatabaseConnector.find_analyses(limit=1000)
+        analyses = DatabaseConnector.find_analyses({}, 1000)
         tokens = [analysis["token"] for analysis in analyses if "token" in analysis]
         
         if not tokens:
