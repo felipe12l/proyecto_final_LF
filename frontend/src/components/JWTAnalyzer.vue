@@ -132,7 +132,7 @@ const getTokenFromResult = (testData, index) => {
     <!-- Tabla de Casos de Prueba -->
     <div v-if="testCases" class="test-cases-container">
       <h3>Casos de Prueba del Repositorio</h3>
-      <p class="test-info">Total de tokens: {{ testCases.total || 0 }}</p>
+      <p class="test-info">Total de tokens: {{ testCases?.results?.length || 0 }}</p>
       
       <div class="table-wrapper">
         <table class="test-table">
@@ -147,7 +147,7 @@ const getTokenFromResult = (testData, index) => {
             </tr>
           </thead>
           <tbody>
-            <tr v-for="(test, index) in testCases.results" :key="index">
+            <tr v-for="(test, index) in (testCases?.results || [])" :key="index">
               <td>{{ index + 1 }}</td>
               <td>
                 <span :class="['badge', test.status === 'ok' ? 'badge-success' : 'badge-error']">
@@ -156,7 +156,7 @@ const getTokenFromResult = (testData, index) => {
               </td>
               <td>{{ test.phase || 'N/A' }}</td>
               <td class="token-cell">
-                <code>{{ truncateToken(testCases.results[index]?.token || 'N/A') }}</code>
+                <code>{{ truncateToken(test.token || 'N/A') }}</code>
               </td>
               <td>{{ test.message || (test.status === 'ok' ? '✓ Válido' : 'Error') }}</td>
               <td>
