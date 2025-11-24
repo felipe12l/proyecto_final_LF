@@ -1,7 +1,6 @@
 from fastapi import APIRouter, HTTPException
-from controllers.analyzeController import analyzeJWT
+from controllers.analyzeController import analyzeJWT, analyze_repository, analyze_repository_summary
 from controllers.encodeController import encode_jwt
-from controllers.analyzeController import analyze_repository
 router = APIRouter()
 
 @router.post("/api/analyze")
@@ -18,3 +17,7 @@ def encode(data: dict):
 @router.get("/api/get_tests")
 def get_tests():
     return analyze_repository()
+
+@router.get("/api/analyze_all")
+def analyze_all():
+    return analyze_repository_summary()

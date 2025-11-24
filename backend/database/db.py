@@ -1,4 +1,5 @@
 import os
+import certifi
 from datetime import datetime
 from typing import Any, Dict, Optional, List
 
@@ -8,43 +9,54 @@ from pymongo.server_api import ServerApi
 
 MONGO_URI = "mongodb+srv://tester:tester123@cluster0.icpam9f.mongodb.net/?appName=Cluster0"
 MONGO_DB = "JWT"
-MONGO_TIMEOUT_MS = int(os.getenv("MONGO_TIMEOUT_MS", "10000"))
+MONGO_TIMEOUT_MS = int(os.getenv("MONGO_TIMEOUT_MS", "30000"))
 
 class DatabaseConnector:
     _client: Optional[MongoClient] = None
     _db = None
+    
     def __init__(self):
-        self._client=MongoClient(MONGO_URI, serverSelectionTimeoutMS=MONGO_TIMEOUT_MS, server_api=ServerApi('1'))
+        self._client = MongoClient(
+            MONGO_URI,
+            serverSelectionTimeoutMS=MONGO_TIMEOUT_MS,
+            server_api=ServerApi('1')
+        )
+    
     @classmethod
-    def get_client(self) -> MongoClient:
-        if self._client is None:
-            self._client = MongoClient(MONGO_URI, serverSelectionTimeoutMS=MONGO_TIMEOUT_MS)
-            self._client.admin.command("ping")
-        return self._client
+    def get_client(cls) -> MongoClient:
+        if cls._client is None:
+            cls._client = MongoClient(
+                MONGO_URI,
+                serverSelectionTimeoutMS=MONGO_TIMEOUT_MS,
+                tlsCAFile=certifi.where(),
+                server_api=ServerApi('1')
+            )
+            cls._client.admin.command("ping")
+        return cls._client
 
     @classmethod
-    def get_db(self):
-        if self._db is None:
-            client = self.get_client()
-            self._db = client[MONGO_DB]
-        return self._db
+    def get_db(cls):
+        if cls._db is None:
+            client = cls.get_client()
+            cls._db = client[MONGO_DB]
+        return cls._db
 
     @classmethod
-    def get_collection(self, name: str) -> Collection:
-        db = self.get_db()
+    def get_collection(cls, name: str) -> Collection:
+        db = cls.get_db()
         return db[name]
 
     @classmethod
-    def init_indexes(self) -> None:
+    def init_indexes(cls) -> None:
         """Crea índices útiles si aún no existen."""
-        coll = self.get_collection("analyses")
+        coll = cls.get_collection("analyses")
         coll.create_index("created_at")
         coll.create_index("token")
     
     @classmethod
-    def save_analysis(self, token: str, result: Dict[str, Any]) -> str:
+    def save_analysis(cls, token: str, result: Dict[str, Any]) -> str:
         """Inserta un documento de análisis y retorna el id como string."""
-        coll = self.get_collection("analyses")
+        coll = cls.get_collection("analyses")
         doc = {
             "token": token,
             "result": result,
@@ -54,17 +66,17 @@ class DatabaseConnector:
         return str(res.inserted_id)
 
     @classmethod
-    def find_analyses(self, filter_query: Dict[str, Any] = None, limit: int = 50) -> List[Dict[str, Any]]:
+    def find_analyses(cls, filter_query: Dict[str, Any] = None, limit: int = 50) -> List[Dict[str, Any]]:
         """Consulta documentos en la colección `analyses`."""
-        coll = self.get_collection("analyses")
+        coll = cls.get_collection("analyses")
         q = filter_query or {}
         cursor = coll.find(q).sort("created_at", -1).limit(limit)
         return list(cursor)
 
     @classmethod
-    def clear_analyses(self) -> int:
+    def clear_analyses(cls) -> int:
         """Elimina todos los documentos en la colección `analyses` y retorna el conteo."""
-        coll = self.get_collection("analyses")
+        coll = cls.get_collection("analyses")
         res = coll.delete_many({})
         return res.deleted_count
 """ 
