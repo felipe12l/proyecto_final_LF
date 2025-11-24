@@ -169,8 +169,6 @@ const truncateToken = (tokenStr) => {
   return tokenStr.length > 50 ? tokenStr.substring(0, 50) + '...' : tokenStr
 }
 
-const numericClaims = ["iat", "exp", "nbf"]
-
 function convertField(key) {
   if (numericClaims.includes(key)) {
     const val = payload.value[key]
