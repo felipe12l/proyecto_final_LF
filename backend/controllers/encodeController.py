@@ -177,7 +177,7 @@ def test_encode_repository():
 
 def get_encoded_tokens():
     try:
-        tokens = DatabaseConnector.find_analyses(limit=1000)
+        tokens = DatabaseConnector.find_encoded_tokens(limit=1000)
 
         if not tokens:
             return {

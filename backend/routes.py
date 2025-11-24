@@ -37,6 +37,9 @@ def analyze(data: dict):
 
 @router.post("/api/encode")
 def encode(data: dict):
+    result = encode_jwt(data)
+
+    DatabaseConnector.save_encoded_token(data, result)
     return encode_jwt(data)
 
 @router.get("/api/get_tests")
